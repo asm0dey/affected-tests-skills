@@ -1,0 +1,22 @@
+// Applies test-order to every Java project without editing build files.
+// Usage: ./gradlew --init-script test-order-init.gradle test
+// From https://parttimenerd.github.io/test-order/docs/GETTING_STARTED ("Gradle init script").
+// shortcut: pinned to the snapshot because no released Gradle plugin exists yet; switch to the
+// released plugin once check_versions.py reports gradle.published = true.
+initscript {
+    repositories {
+        maven { url 'https://central.sonatype.com/repository/maven-snapshots/' }
+        gradlePluginPortal()
+    }
+    dependencies {
+        classpath 'me.bechberger:test-order-gradle-plugin:0.0.1-SNAPSHOT'
+    }
+}
+projectsLoaded {
+    allprojects { project ->
+        if (project.buildFile.absolutePath.contains('buildSrc')) return
+        project.plugins.withId('java') {
+            project.apply plugin: me.bechberger.testorder.gradle.TestOrderPlugin
+        }
+    }
+}
