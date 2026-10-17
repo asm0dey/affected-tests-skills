@@ -50,10 +50,19 @@ wrong without it.
 - `true` → add `id("me.bechberger.test-order") version "<gradle.latest>"` to the `plugins {}` block
   (Groovy: `id 'me.bechberger.test-order' version '<v>'`) of each JVM project, or once via a
   convention plugin if the build has one.
-- `false` → no released plugin exists yet. Offer the no-build-edit route: copy
-  `assets/test-order-init.gradle` into the project (or `~/.gradle/init.d/` for all projects, which
-  is the user's choice) and run Gradle with `--init-script test-order-init.gradle`. It uses the Sonatype
-  snapshot repository. Tell the user that's a snapshot dependency.
+- `false` → the Gradle plugin isn't published anywhere (no release, no snapshot), but its source
+  is tagged with each release. Offer to build it locally. This runs a third-party build, so ask first:
+  ```bash
+  git clone --depth 1 --branch v<maven.latest> https://github.com/parttimenerd/test-order /tmp/test-order-src
+  (cd /tmp/test-order-src/test-order-gradle-plugin && ./gradlew publishToMavenLocal -x test)
+  ```
+  Build from the **release tag**, not `main`: `main` moves ahead of the released core and fails to
+  compile against it. The rest of test-order (core, agent, JUnit integration) still comes from
+  Maven Central. Then copy `assets/test-order-init.gradle` (it resolves the plugin from
+  `mavenLocal()`) into the project, or into `~/.gradle/init.d/` for all projects, which is the
+  user's choice. Pass `--init-script test-order-init.gradle` on every Gradle call unless it lives
+  in `init.d`. Replace `VERSION` in it with `maven.latest`. Tell the user this is a locally built
+  plugin; once `gradle.published` turns `true`, switch to the plugins block above.
 
 **Kotlin projects** (`src/*/kotlin`, `*.kt`): test-order tracks compiled bytecode, so Kotlin works, but
 `inline fun` bodies are copied into call sites and the default MEMBER tracking loses them. Use

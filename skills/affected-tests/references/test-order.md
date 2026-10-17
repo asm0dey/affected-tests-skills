@@ -1,10 +1,15 @@
 # test-order reference
 
 Docs: https://parttimenerd.github.io/test-order/ (Getting started, Maven plugin, CLI reference).
-Status: experimental (SapMachine team). Maven plugin `0.1.0` is on Maven Central; the Gradle plugin
-was not on the Gradle Plugin Portal or Central when this skill was written — Gradle needs the Sonatype
-snapshot repo (`0.0.1-SNAPSHOT`). The versions below go stale: run `scripts/check_versions.py` and use
-the versions it reports.
+Status: experimental (SapMachine team). Maven plugin `0.1.0` is on Maven Central. The Gradle plugin
+is in the source tree (`test-order-gradle-plugin/`, version 0.1.0 at tag `v0.1.0`) but not published:
+not on the Plugin Portal, Central, or the Sonatype snapshot repo. Build it from the release tag
+(see `affected-tests-setup`). Versions go stale: run `scripts/check_versions.py`.
+
+Upstream also ships a short official skill (`skills/test-order/SKILL.md` in the repo). It covers the
+goal list, JSON output and `Run:` recovery lines. Two of its claims didn't hold when this was
+written: it says the Gradle plugin is on the Plugin Portal, and its "try without modifying POM"
+command never learns (see Setup below).
 
 ## Setup
 
@@ -50,3 +55,16 @@ Every failing test the full suite found, test-order found too. The learn run too
 A name/import heuristic run on the same bugs missed the template bug entirely and caught
 only 2 of 6 and 1 of 4 failing classes on the first two: that is why the skill has no
 heuristic fallback.
+
+## Measured on exchange-bot (Kotlin, Kotest 6.2.5, Gradle, 38 specs, full suite ≈ 47 s incl. compile)
+
+Plugin built from the `v0.1.0` tag, applied by init script, `-Dtestorder.instrumentation.mode=CLASS`.
+Learn run: 29 s, `Index written: 4 KB (38 tests)`.
+
+| Bug | Full suite: failing specs | `testOrderAffected`: selected / time / failing caught |
+|---|---|---|
+| matcher side check | 8 | 23 of 38 / 18 s / 8 |
+| status code inside `inline fun` | 1 | 23 of 38 / 9 s / 1 |
+| tolerance range | 3 | 23 of 38 / 9 s / 3 |
+
+`./gradlew testOrderAffected test` (the form upstream's docs show) ran the full `:test` task too.

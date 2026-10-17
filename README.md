@@ -44,15 +44,20 @@ test-order caught every failing test. A name-and-import heuristic tried on the s
 on the template bug, so these skills have no heuristic fallback: without test-order they run the
 full suite.
 
+Same check on a Kotlin/Kotest Gradle project (38 specs, 3 injected bugs): every failing spec caught,
+9–18 s per run.
+
 ## Status
 
-- test-order is experimental. Maven plugin `0.1.0` is on Maven Central. The Gradle plugin is not
-  released yet, so Gradle setup goes through an init script and a snapshot dependency.
-- Verified by hand: Maven + Quarkus (the table above).
-- Not yet verified: the Gradle init-script path, Kotlin/Kotest projects, and an end-to-end run of
-  `affected-tests-setup` as written.
+- test-order is experimental. Maven plugin `0.1.0` is on Maven Central.
+- The Gradle plugin isn't published yet. `affected-tests-setup` builds it from the matching release
+  tag into `~/.m2` and applies it with an init script, so no build files change.
+- Verified by hand: Maven + Quarkus (Java) and Gradle + Kotest (Kotlin), the numbers above.
+- Not yet verified: an end-to-end run of `affected-tests-setup` exactly as written.
 
-Reports and fixes are welcome.
+test-order ships its own short [official skill](https://github.com/parttimenerd/test-order/tree/main/skills/test-order)
+(goal reference, JSON output, error recovery). These skills add the version check, the
+setup-and-verify flow, the fix loop, and the measured caveats.
 
 ## License
 

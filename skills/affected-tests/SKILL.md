@@ -37,8 +37,10 @@ Then decide:
 
 ```bash
 ./mvnw test-order:affected test          # Maven
-./gradlew testOrderAffected              # Gradle
+./gradlew testOrderAffected              # Gradle: on its own, never `testOrderAffected test`
 ```
+
+On Gradle, don't append `test`: `./gradlew testOrderAffected test` also runs the regular `:test` task, which is the full suite (seen on exchange-bot: both ran, every failure printed twice). `testOrderAffected` runs the selected subset by itself.
 
 Report the `[test-order] Selected N tests (A scored + B new), deferred M` line. If it warns that a changed class "appears in deps of >50% of tests", the run is close to the full suite: say so rather than presenting it as selective.
 
@@ -64,7 +66,7 @@ Full-suite time: use a measured number (this session, the learn run, the user); 
 
 ## Things that skew the numbers
 
-- Kotlin: precision drops around `inline fun` unless the project uses `-Dtestorder.instrumentation.mode=CLASS` (set by `/affected-tests-setup`). Kotest gets class-level ordering only, and only through `kotest-runner-junit5`.
+- Kotlin: verified on a Kotest 6.2.5 project (exchange-bot) with CLASS mode: every failing spec the full suite found in 3 injected bugs was caught, including one inside an `inline fun`. Precision drops around `inline fun` unless the project uses `-Dtestorder.instrumentation.mode=CLASS` (set by `/affected-tests-setup`). Kotest gets class-level ordering only, and only through `kotest-runner-junit5`.
 
 - Quarkus / Spring Boot suites pay a fixed boot cost (~30 s) no matter how few tests run.
 - `@TestProfile` / `@DirtiesContext` tests restart the app. A selection that pulls several in can approach full-suite time; on calit one selection of 25 classes took 233 s against 285 s for the full suite.
